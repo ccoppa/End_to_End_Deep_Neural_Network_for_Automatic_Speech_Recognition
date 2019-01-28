@@ -6,6 +6,7 @@ them to the network for training or testing.
 import json
 import numpy as np
 import random
+from python_speech_features import mfcc
 import librosa
 import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
@@ -17,21 +18,22 @@ from utils import conv_output_length
 RNG_SEED = 123
 
 class AudioGenerator():
-    def __init__(self, step=10, window=20, max_freq=8000, 
-        minibatch_size=20, desc_file=None, max_duration=10.0, 
+    def __init__(self, step=10, window=20, max_freq=8000, mfcc_dim=13,
+        minibatch_size=20, desc_file=None, spectrogram=True, max_duration=10.0, 
         sort_by_duration=False):
         """
         Params:
-            step (int): Step size in milliseconds between windows (for spectrogram)
-            window (int): FFT window size in milliseconds (for spectrogram)
+            step (int): Step size in milliseconds between windows (for spectrogram ONLY)
+            window (int): FFT window size in milliseconds (for spectrogram ONLY)
             max_freq (int): Only FFT bins corresponding to frequencies between
-                [0, max_freq] are returned (for spectrogram)
+                [0, max_freq] are returned (for spectrogram ONLY)
             desc_file (str, optional): Path to a JSON-line file that contains
                 labels and paths to the audio files. If this is None, then
                 load metadata right away
         """
 
         self.feat_dim = calc_feat_dim(window, max_freq)
+        self.mfcc_dim = mfcc_dim
         self.feats_mean = np.zeros((self.feat_dim,))
         self.feats_std = np.ones((self.feat_dim,))
         self.rng = random.Random(RNG_SEED)
@@ -43,7 +45,7 @@ class AudioGenerator():
         self.cur_train_index = 0
         self.cur_valid_index = 0
         self.cur_test_index = 0
-        self.max_duration = max_duration
+        self.max_duration=max_duration
         self.minibatch_size = minibatch_size
         self.spectrogram = spectrogram
         self.sort_by_duration = sort_by_duration
@@ -78,7 +80,7 @@ class AudioGenerator():
         
         # initialize the arrays
         X_data = np.zeros([self.minibatch_size, max_length, 
-            self.feat_dim*self.spectrogram])
+            self.feat_dim*self.spectrogram + self.mfcc_dim*(not self.spectrogram)])
         labels = np.ones([self.minibatch_size, max_string_length]) * 28
         input_length = np.zeros([self.minibatch_size, 1])
         label_length = np.zeros([self.minibatch_size, 1])
@@ -232,10 +234,14 @@ class AudioGenerator():
         Params:
             audio_clip (str): Path to the audio clip
         """
-        return spectrogram_from_file(
-            audio_clip, step=self.step, window=self.window,
-            max_freq=self.max_freq)
-        
+        if self.spectrogram:
+            return spectrogram_from_file(
+                audio_clip, step=self.step, window=self.window,
+                max_freq=self.max_freq)
+        else:
+            (rate, sig) = wav.read(audio_clip)
+            return mfcc(sig, rate, numcep=self.mfcc_dim)
+
     def normalize(self, feature, eps=1e-14):
         """ Center a feature using the mean and std
         Params:
@@ -274,10 +280,14 @@ def vis_train_features(index=0):
     """ Visualizing the data point in the training set at the supplied index
     """
     # obtain spectrogram
-    audio_gen = AudioGenerator()
+    audio_gen = AudioGenerator(spectrogram=True)
     audio_gen.load_train_data()
     vis_audio_path = audio_gen.train_audio_paths[index]
     vis_spectrogram_feature = audio_gen.normalize(audio_gen.featurize(vis_audio_path))
+    # obtain mfcc
+    audio_gen = AudioGenerator(spectrogram=False)
+    audio_gen.load_train_data()
+    vis_mfcc_feature = audio_gen.normalize(audio_gen.featurize(vis_audio_path))
     # obtain text label
     vis_text = audio_gen.train_texts[index]
     # obtain raw audio
@@ -285,7 +295,7 @@ def vis_train_features(index=0):
     # print total number of training examples
     print('There are %d total training examples.' % len(audio_gen.train_audio_paths))
     # return labels for plotting
-    return vis_text, vis_raw_audio, vis_spectrogram_feature, vis_audio_path
+    return vis_text, vis_raw_audio, vis_mfcc_feature, vis_spectrogram_feature, vis_audio_path
 
 
 def plot_raw_audio(vis_raw_audio):
@@ -297,6 +307,20 @@ def plot_raw_audio(vis_raw_audio):
     plt.title('Audio Signal')
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
+    plt.show()
+
+def plot_mfcc_feature(vis_mfcc_feature):
+    # plot the MFCC feature
+    fig = plt.figure(figsize=(12,5))
+    ax = fig.add_subplot(111)
+    im = ax.imshow(vis_mfcc_feature, cmap=plt.cm.jet, aspect='auto')
+    plt.title('Normalized MFCC')
+    plt.ylabel('Time')
+    plt.xlabel('MFCC Coefficient')
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(im, cax=cax)
+    ax.set_xticks(np.arange(0, 13, 2), minor=False);
     plt.show()
 
 def plot_spectrogram_feature(vis_spectrogram_feature):
