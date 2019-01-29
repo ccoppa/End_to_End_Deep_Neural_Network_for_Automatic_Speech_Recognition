@@ -15,7 +15,7 @@ In this notebook, we will build a deep neural network (CNN + GRU + CTC) that fun
 * **To run **
 Simply run `asr_notebook.ipynb` and results will be automatically saved in the `results` folder.
 
-## Python libraries that need importing
+## Python libraries used
 
 * python_speech_features
 * TensorFlow
