@@ -5,7 +5,7 @@
 In this notebook, we will build a deep neural network (CNN + GRU + CTC) that functions as part of an end-to-end automatic speech recognition (ASR) pipeline in Keras framework.
 
 ## Data Sets 
-[LibriSpeech ASR corpus](http://www.openslr.org/12)
+[LibriSpeech ASR corpus](http://www.openslr.org/12) will be used to train and validate the models.
 
 ## Modeling step
 - We begin by investigating the LibriSpeech dataset that will be used to train and evaluate the models. 
