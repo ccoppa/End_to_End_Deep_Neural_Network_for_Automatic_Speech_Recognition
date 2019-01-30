@@ -11,7 +11,7 @@ In this notebook, we will build a deep neural network (CNN + GRU + CTC) that fun
 - We begin by investigating the LibriSpeech dataset that will be used to train and evaluate the models. 
 - Algorithm will first convert the raw audio data to feature representations (Spectrograms and MFCCs) that are commonly used for ASR. 
 - Build and compare the performance of various neural networks that map the audio features to transcribed text. 
-- Recurrent neural network `---` GRU
+- Recurrent neural network '---' GRU
 
 * **To run **
 Simply run `asr_notebook.ipynb` and results will be automatically saved in the `results` folder.
