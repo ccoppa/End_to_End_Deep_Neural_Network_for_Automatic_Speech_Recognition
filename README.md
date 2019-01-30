@@ -12,7 +12,12 @@ In this notebook, we will build a deep neural network that functions as part of 
 - Algorithm will first convert the raw audio data to feature representations (Spectrograms and MFCCs) that are commonly used for ASR. 
 - Build and compare the performance of various neural networks that map the audio features to transcribed text. 
 - The main model components are - CNN, GRU and CTC. 
-- CNNs are popular in image analys as they are excellent for image feature extractions. Since audio data can be represented in spectrogram or MFCC and spectrogram and MFCC can be thought of as an image; therefore CNN can be applied on top of RNN for better performance. 
+- CNNs are popular in image analys as they are excellent for image feature extractions. Since audio data can be represented in Spectrogram (or MFCC) and Spectrogram (or MFCC) can be thought of as a visual representation of speech, CNN can be applied on top of RNN to complement each other for better performance. The job of CNN in this model is to convert Spectrogram image data into higher representations or features for the acoustic model. 
+- Gated recurrent unit (GRU) is a variant of LSTM that can track time series data through memory. This type of neural networks have temporal memory as it uses a gating mechanism to ensure proper propagation of information through time steps. This temporal memory is an important characteristics for training and decoding speech.
+- Since GRUs produce probability densities over each time slice, we need a way to solve the sequencing issue.
+- Connectionist Temporal Classification (CTC) is used to convert RNN outputs into words.
+- *to continue addressing sequencing issues.
+
 
 * **To run **
 Simply run `asr_notebook.ipynb` and results will be automatically saved in the `results` folder.
