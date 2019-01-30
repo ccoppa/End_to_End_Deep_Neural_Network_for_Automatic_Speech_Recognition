@@ -8,7 +8,7 @@ import _pickle as pickle
 from keras import backend as K
 from keras.models import Model
 from keras.layers import (Input, Lambda)
-from keras.optimizers import (SGD, Adam)
+from keras.optimizers import SGD
 from keras.callbacks import (ModelCheckpoint, EarlyStopping)  
 import os
 
