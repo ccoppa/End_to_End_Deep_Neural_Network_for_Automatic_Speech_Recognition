@@ -24,7 +24,7 @@ In this notebook, we will build a deep neural network that functions as part of 
 - [Not implemented in this project]: A more complex CTC decoding can provide not only the most likely transcription, but also some number of top choices using a beam search of arbitrary size. This is useful if the result will then be processed with a language model for additional accuracy. 
 
 
-* **To run **
+## Model training
 Simply run `asr_notebook.ipynb` and results will be automatically saved in the `results` folder.
 
 ## Python libraries used
