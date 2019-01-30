@@ -18,8 +18,10 @@ In this notebook, we will build a deep neural network that functions as part of 
 - Sequencing issue is that the number of frames does not have a predictible correspondence to the number of the output symbols eg. phonemes, graphemes, or words. For example, if we speak the same word "speech" in two different speed ie. consider saying "speech" vs "speeeech", the length of input signals are different, but our ASR should decode both as the same six-letter word, "speech".
 - The RNN could learn what those graphemes should be if there was a label associated with each frame, but this would require some sort of manual pre-segmentation and is not a practical approach for implementation. 
 - A more ideal solution would be to provide the network with a loss function across the entire label sequence that it could minimize when training. We would like the probability distribution of the softmax output to "spike" for each grapheme and provide blanks or some other consistently ignored result between the graphemes so that the transcription could be easily decoded. This would solve the sequencing problem as audio signals of arbitrary length are converted to text.
-- Connectionist Temporal Classification (CTC) loss function can help to solve the sequencing issue and convert RNN outputs into words.
-- 
+- Connectionist Temporal Classification (CTC) loss function can be used to train the networks and to help solving the sequencing issue.
+- CTC decodes the most likely symbol from each softmax distribution and results in a string of symbols in a length that is equivalent to the original input sequence (the frames). However, with the CTC training, the probable symbols have become consolidated. The CTC decoding algorithm can then compress the transcription to its correct length by ignoring adjacent duplicates and blanks.
+- Combining the CTC decoding algorithm with the softmax output layer would convert the RNN outputs into text. The sequence-to-sequence transformation of our ASR is then achieved! 
+- [Not implemented in this project]: A more complex CTC decoding can provide not only the most likely transcription, but also some number of top choices using a beam search of arbitrary size. This is useful if the result will then be processed with a language model for additional accuracy. 
 
 
 * **To run **
