@@ -12,11 +12,14 @@ In this notebook, we will build a deep neural network that functions as part of 
 - Algorithm will first convert the raw audio data to feature representations (Spectrograms and MFCCs) that are commonly used for ASR. 
 - Build and compare the performance of various neural networks that map the audio features to transcribed text. 
 - The main model components are - CNN, GRU and CTC. 
-- CNNs are popular in image analys as they are excellent for image feature extractions. Since audio data can be represented in Spectrogram (or MFCC) and Spectrogram (or MFCC) can be thought of as a visual representation of speech, CNN can be applied on top of RNN to complement each other for better performance. The job of CNN in this model is to convert Spectrogram image data into higher representations or features for the acoustic model. 
-- Gated recurrent unit (GRU) is a variant of LSTM that can track time series data through memory. This type of neural networks have temporal memory as it uses a gating mechanism to ensure proper propagation of information through time steps. This temporal memory is an important characteristics for training and decoding speech.
-- Since GRUs produce probability densities over each time slice, we need a way to solve the sequencing issue.
-- Connectionist Temporal Classification (CTC) is used to convert RNN outputs into words.
-- *to continue addressing sequencing issues.
+- CNNs are popular in image analys as they are excellent for image feature extractions. Since audio data can be represented in Spectrogram (or MFCC) and Spectrogram (or MFCC) can be thought of as a visual representation of speech, CNN can be applied on top of RNN to complement each other for better performance. The job of CNN in this model is to convert Spectrogram image data into higher representations or features for the rest of the acoustic model. 
+- Gated recurrent unit (GRU), a variant of LSTM, can track time series data through memory. This type of neural networks have temporal memory as it uses a gating mechanism to ensure proper propagation of information through time steps. This temporal memory is an important characteristics for training and decoding speech.
+- Since GRUs produce `probability densities` over each time step, we will have the sequencing issue. 
+- Sequencing issue is that the number of frames does not have a predictible correspondence to the number of the output symbols eg. phonemes, graphemes, or words. For example, if we speak the same word "speech" in two different speed ie. consider saying "speech" vs "speeeech", the length of input signals are different, but our ASR should decode both as the same six-letter word, "speech".
+- The RNN could learn what those graphemes should be if there was a label associated with each frame, but this would require some sort of manual pre-segmentation and is not a practical approach for implementation. 
+- A more ideal solution would be to provide the network with a loss function across the entire label sequence that it could minimize when training. We would like the probability distribution of the softmax output to "spike" for each grapheme and provide blanks or some other consistently ignored result between the graphemes so that the transcription could be easily decoded. This would solve the sequencing problem as audio signals of arbitrary length are converted to text.
+- Connectionist Temporal Classification (CTC) loss function can help to solve the sequencing issue and convert RNN outputs into words.
+- 
 
 
 * **To run **
