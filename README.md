@@ -9,14 +9,15 @@ In this notebook, we will build a deep neural network that functions as part of 
 
 ## Modeling step
 - We begin by investigating the LibriSpeech dataset that will be used to train and evaluate the models. 
-- Algorithm will first convert the raw audio data to feature representations (Spectrograms and MFCCs) that are commonly used for ASR. 
+- Algorithm will first convert the raw audio data to feature representations ([Spectrograms](https://www.youtube.com/watch?v=_FatxGN3vAM) and [MFCCs](https://en.wikipedia.org/wiki/Mel-frequency_cepstrum)) that are commonly used for ASR. 
 - Build and compare the performance of various neural networks that map the audio features to transcribed text. 
 - The main model components are - CNN, GRU and CTC. 
 - CNNs are popular in image analys as they are excellent for image feature extractions. Since audio data can be represented in Spectrogram (or MFCC) and Spectrogram (or MFCC) can be thought of as a visual representation of speech, CNN can be applied on top of GRU to complement each other for better performance. The job of CNN in this model is to convert Spectrogram image data into higher representations or features for the rest of the acoustic model. 
 - Gated recurrent unit (GRU), a variant of LSTM, can track time series data through memory. This type of neural networks have temporal memory as it uses a gating mechanism to ensure proper propagation of information through time steps. This temporal memory is an important characteristics for training and decoding speech.
-- Time distributed dense layer is applied to GRU outputs to keep one-to-one relations on input and output, so that the GRU output doesn't need to get flatten to randomly interact between different timesteps. This helps finding patterns in temporal data easier. 
-- One shortcoming of conventional RNNs is that they are only able to make use of previous context. Bidirectional GRUs are implemented to process the data in both directions with two separate hidden layers which are then fed forwards to the same output layer.
-- Batch normalization, which uses mini-batch statistics to standardize features, is leveraged to expedite convergence of model training and is applied to both CNN and GRU outputs.
+- [variational inference based dropout technique](http://arxiv.org/abs/1512.05287) is applied in our GRU models to alleviate overfitting.
+- [Time distributed](https://keras.io/layers/wrappers/) dense layer is applied to GRU outputs to keep one-to-one relations on input and output, so that the GRU output doesn't need to get flatten to randomly interact between different timesteps. This helps finding patterns in temporal data easier. 
+- One shortcoming of conventional RNNs is that they are only able to make use of previous context. [Deep bidirectional GRUs](https://www.cs.toronto.edu/~graves/asru_2013.pdf) are implemented to process the data in both directions with two separate hidden layers which are then fed forwards to the same output layer.
+- [Batch normalization](https://arxiv.org/pdf/1510.01378.pdf), which uses mini-batch statistics to standardize features, is leveraged to expedite convergence of model training and is applied to both CNN and GRU outputs.
 - Since GRUs produce "probability densities" over each time step, we will have the sequencing issue. 
 - Sequencing issue is that the number of frames does not have a predictible correspondence to the number of the output symbols eg. phonemes, graphemes, or words. For example, if we speak the same word "speech" in two different speed ie. consider saying "speech" vs "speeeech", the length of input signals are different, but our ASR should decode both as the same six-letter word, "speech".
 - The GRU could learn what those graphemes should be if there was a label associated with each frame, but this would require some sort of manual pre-segmentation and is not a practical approach for implementation. 
@@ -51,4 +52,13 @@ Simply run `asr_notebook.ipynb` and results will be automatically saved in the `
 * requests
 * \_pickle
 
+## Next steps for further improvement
+Besides using more data to train the model, there are two methods that we can try to improve model performance.
+1. One standard way to improve the results of the decoder is to incorporate a `language model (LM)`. The job of a LM is to inject the language knowledge into the words-to-text step in ASR, providing another layer of processing between words and text to solve ambiguities in spelling and context. Google AI Language recently published [BERT]( https://arxiv.org/abs/1810.04805) which applies the bidirectional training of `Transformer`, an attention model, to language modelling. BERT seems like a promising approach to try.
 
+2. Alternately, we can try two other popular ASR architectures:
+    - attention-based `Seq2Seq` models which powered [Listend-Attend-Spell](https://arxiv.org/abs/1508.01211)
+    - `RNN-Transducer`, which can be thought of as an encoder-decoder model, assumes the alignment between input and output tokens is local and monotonic. RNN-Transducer implementation has shown success without LMs.
+    
+Final words about LM: [Deep Speech 3](http://research.baidu.com/Blog/index-view?id=90)
+>Language models are vital to speech recognition because language models can be trained rapidly on much larger datasets, and secondly language models can be used for specializing the speech recognition model according to context (user, geography, application etc.) without a labeled speech corpus for each context. The latter is especially vital in a production speech recognition system.
